@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms'
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import {JsonPipe} from '@angular/common';
 
 interface SortOrder {
   value: string;
@@ -15,13 +16,27 @@ interface SortColumn {
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, JsonPipe],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
 
-export class AppComponent {
+export class AppComponent implements AfterViewInit{
+
   title = 'BookSearch-FE';
+  isInvalidForm :boolean | null = false;
+  searchTerm:string = '';
+  sortOrder:string = 'DESC';
+  sortColumn:string = 'created_at';
+  minCopies:number = 1;
+  maxCopies:number = 1;
+  minRating: number = 0;
+  maxRating: number = 0;
+  minDate: string = '0001-01-01T00:00:00Z';
+  maxDate: string = '9999-12-31T23:59:59Z';
+  @ViewChild('myForm') form!: NgForm;
+  formErrors: string[] = [];
+
   sortOrders: SortOrder[] = [
     {value: 'ASC', viewValue: 'Ascending'},
     {value: 'DESC', viewValue: 'Descending'},
@@ -33,4 +48,50 @@ export class AppComponent {
     {value: 'rating', viewValue: 'Book rating'},
     {value: 'title', viewValue: 'Book title'}
   ];
+
+  ngAfterViewInit(): void {
+    this.form.statusChanges?.subscribe(()=>{
+      this.formErrors = [];
+      if (!this.checkCopiesInput() || !this.checkRatingInput()){
+        this.isInvalidForm = true;
+      }
+      else{
+        this.isInvalidForm = false;
+      }
+    });
+  }
+
+  private checkCopiesInput(): boolean{
+    const minCopies:string = String(this.form.controls['mincopies']?.value ?? '');
+    const maxCopies:string = String(this.form.controls['maxcopies']?.value ?? '');
+    console.log(typeof(minCopies));
+    if (!minCopies || !maxCopies){
+      this.formErrors.push('min copies or max copies is empty');
+      return false;
+    }
+    if (minCopies.includes('.') || maxCopies.includes('.')){
+      this.formErrors.push('min copies and max copies have to be whole numbers')
+      return false;
+    }
+    let minCopiesNum: number = Number(minCopies);
+    let maxCopiesNum: number = Number(maxCopies);
+    if (maxCopiesNum < minCopiesNum){
+      return false;
+    }
+    return true;
+  }
+
+  private checkRatingInput(): boolean{
+    const minRating:string = String(this.form.controls['minrating']?.value);
+    const maxRating:string = String(this.form.controls['maxrating']?.value);
+    if (minRating === null || maxRating === null){
+      return false;
+    }
+    let minRatingNum: number = Number(minRating);
+    let maxRatingNum: number = Number(maxRating);
+    if (maxRatingNum < minRatingNum){
+      return false;
+    }
+    return true;
+  }
 }

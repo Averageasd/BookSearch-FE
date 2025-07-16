@@ -1,5 +1,5 @@
 <header>
-  <h1 class="text-3xl font-bold underline text-center mt-10">Angular v19.1 + Tailwind CSS 4.0</h1>
+  <h1 class="text-xl font-bold underline text-center mt-10">Angular v19.1 + Tailwind CSS 4.0</h1>
 </header>
 <main>
   <div class="max-w-4xl m-auto">
@@ -8,13 +8,18 @@
           class="bg-neutral-50 px-2 grow-4 shadow-2xs border-2 border-blue-500"
           placeholder="search term for title, author and description..."
           type="text"
+          name="searchTerm"
+          [(ngModel)]="searchTerm"
         />
-        <button class="text-neutral-50 bg-blue-500 px-2 grow-1">search</button>
+        <button [disabled]="isInvalidForm" class="text-neutral-50 bg-blue-500 px-2 grow-1 disabled:bg-blue-300 disabled:cursor-not-allowed">search</button>
       </form>
   </div>
-  <div class="bg-white max-w-6xl border-1 border-neutral-200 m-auto">
-    <form class="flex min-h-24 p-3 gap-x-12 gap-y-4 flex-wrap">
-
+  <div
+    class="bg-white max-w-6xl border-1 border-neutral-200 m-auto"
+    >
+    <form 
+    #myForm="ngForm" 
+    class="flex min-h-24 p-3 gap-x-12 gap-y-4 flex-wrap">
       <div>
         <label for="startDate">Start Date:</label>
         <br>
@@ -24,7 +29,7 @@
       <div>
         <label for="startDate">End Date:</label>
         <br>
-        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" name="endDate">
+        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" value="9999-12-31" name="endDate">
       </div>
       
       <div>
@@ -48,11 +53,13 @@
         <br>
         <input 
           class="border-1 bg-neutral-50 border-neutral-200"
-          placeholder="enter min copies"
           type="number"
           min="1"
           value="1"
           max="100"
+          name="mincopies"
+          [(ngModel)]="minCopies"
+          #mincopies="ngModel"
         />
       </div>
       
@@ -61,41 +68,55 @@
         <br>
         <input 
           class="border-1 bg-neutral-50 border-neutral-200"
-          placeholder="enter max copies"
           type="number"
-          value="1"
           min="1"
+          value="1"
           max="100"
+          name="maxcopies"
+          [(ngModel)]="maxCopies"
+          #maxcopies="ngModel"
+
         />
       </div>
 
       <div>
-        <label>Enter number of min rating:</label>
+        <label for="minrating">Enter number of min rating:</label>
         <br>
         <input 
+          id="minrating"
           class="border-1 bg-neutral-50 border-neutral-200"
-          placeholder="enter min copies"
           type="number"
           min="0"
           value="0"
           max="5"
+          [(ngModel)]="minRating"
+          name="minrating"
+          #minrating="ngModel"
+         
         />
       </div>
       
       <div>
-        <label>Enter number of max rating:</label>
+        <label for="maxrating">Enter number of max rating:</label>
         <br>
         <input 
+          id="maxrating"
           class="border-1 bg-neutral-50 border-neutral-200"
-          placeholder="enter max copies"
           type="number"
           value="0"
           min="0"
           max="5"
+          [(ngModel)]="maxRating"
+          name="maxrating"
+          #maxrating="ngModel"
         />
       </div>
-      
     </form>
+    <div class="px-3">
+      <div *ngFor="let error of formErrors">
+        
+      </div>
+    </div>
   </div>
 
   
