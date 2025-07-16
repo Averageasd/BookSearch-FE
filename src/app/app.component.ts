@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms'
 
 interface SortOrder {
   value: string;
@@ -13,7 +15,7 @@ interface SortColumn {
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })

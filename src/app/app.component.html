@@ -2,13 +2,103 @@
   <h1 class="text-3xl font-bold underline text-center mt-10">Angular v19.1 + Tailwind CSS 4.0</h1>
 </header>
 <main>
-  <form class="px-5 py-5">
-    <input 
-      class="bg-neutral-50 px-2 rounded shadow-2xs w-full block border-2 border-blue-500"
-      placeholder="search term for title, author and description"
-      type="text"
-    />
-  </form>
+  <div class="max-w-4xl m-auto">
+      <form class="px-5 py-5 flex">
+        <input 
+          class="bg-neutral-50 px-2 grow-4 shadow-2xs border-2 border-blue-500"
+          placeholder="search term for title, author and description..."
+          type="text"
+        />
+        <button class="text-neutral-50 bg-blue-500 px-2 grow-1">search</button>
+      </form>
+  </div>
+  <div class="bg-white max-w-6xl border-1 border-neutral-200 m-auto">
+    <form class="flex min-h-24 p-3 gap-x-12 gap-y-4 flex-wrap">
+
+      <div>
+        <label for="startDate">Start Date:</label>
+        <br>
+        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="startDate" name="startDate">
+      </div>
+      
+      <div>
+        <label for="startDate">End Date:</label>
+        <br>
+        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" name="endDate">
+      </div>
+      
+      <div>
+        <label>Pick a column to sort:</label>
+        <br>
+        <select class="border-1 bg-neutral-50 border-neutral-200">
+          <option *ngFor="let sortColumn of sortColumns" [ngValue]="sortColumn.value">{{sortColumn.viewValue}}</option>
+        </select>
+      </div>
+      
+      <div>
+        <label>Pick a sorting order:</label>
+        <br>
+        <select class="border-1 bg-neutral-50 border-neutral-200">
+          <option *ngFor="let sortOrder of sortOrders" [ngValue]="sortOrder.value">{{sortOrder.viewValue}}</option>
+        </select>
+      </div>
+      
+      <div>
+        <label>Enter number of min copies:</label>
+        <br>
+        <input 
+          class="border-1 bg-neutral-50 border-neutral-200"
+          placeholder="enter min copies"
+          type="number"
+          min="1"
+          value="1"
+          max="100"
+        />
+      </div>
+      
+      <div>
+        <label>Enter number of max copies:</label>
+        <br>
+        <input 
+          class="border-1 bg-neutral-50 border-neutral-200"
+          placeholder="enter max copies"
+          type="number"
+          value="1"
+          min="1"
+          max="100"
+        />
+      </div>
+
+      <div>
+        <label>Enter number of min rating:</label>
+        <br>
+        <input 
+          class="border-1 bg-neutral-50 border-neutral-200"
+          placeholder="enter min copies"
+          type="number"
+          min="0"
+          value="0"
+          max="5"
+        />
+      </div>
+      
+      <div>
+        <label>Enter number of max rating:</label>
+        <br>
+        <input 
+          class="border-1 bg-neutral-50 border-neutral-200"
+          placeholder="enter max copies"
+          type="number"
+          value="0"
+          min="0"
+          max="5"
+        />
+      </div>
+      
+    </form>
+  </div>
+
+  
   <article class="book-card bg-neutral-50">
     <h4 class="text-xl font-bold">Card title</h4>
     <div>
