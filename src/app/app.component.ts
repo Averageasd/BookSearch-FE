@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import {JsonPipe} from '@angular/common';
 
@@ -21,7 +21,7 @@ interface SortColumn {
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
 
-export class AppComponent implements AfterViewInit{
+export class AppComponent implements OnInit{
 
   title = 'BookSearch-FE';
   isInvalidForm :boolean | null = false;
@@ -34,7 +34,10 @@ export class AppComponent implements AfterViewInit{
   maxRating: number = 0;
   minDate: string = '0001-01-01T00:00:00Z';
   maxDate: string = '9999-12-31T23:59:59Z';
-  @ViewChild('myForm') form!: NgForm;
+  advancedSearchAvailable:boolean = false;
+
+  // we want to make sure angular does not query this element before ngOnInit thus preventing it from being null unexpectedly.
+  @ViewChild('myForm', { static: false }) form!: NgForm;
   formErrors: string[] = [];
 
   sortOrders: SortOrder[] = [
@@ -48,23 +51,26 @@ export class AppComponent implements AfterViewInit{
     {value: 'rating', viewValue: 'Book rating'},
     {value: 'title', viewValue: 'Book title'}
   ];
-
-  ngAfterViewInit(): void {
-    this.form.statusChanges?.subscribe(()=>{
-      this.formErrors = [];
-      if (!this.checkCopiesInput() || !this.checkRatingInput()){
-        this.isInvalidForm = true;
-      }
-      else{
-        this.isInvalidForm = false;
-      }
-    });
+  ngOnInit(): void {
+    if (this.form && this.form.statusChanges){
+      this.form.statusChanges?.subscribe(()=>{
+        console.log('get called?');
+        this.formErrors = [];
+        if (!this.checkCopiesInput() || !this.checkRatingInput()){
+          this.isInvalidForm = true;
+        }
+        else{
+          this.isInvalidForm = false;
+        }
+      });
+    }
   }
 
   private checkCopiesInput(): boolean{
     const minCopies:string = String(this.form.controls['mincopies']?.value ?? '');
     const maxCopies:string = String(this.form.controls['maxcopies']?.value ?? '');
     console.log(typeof(minCopies));
+    console.log(minCopies, maxCopies);
     if (!minCopies || !maxCopies){
       this.formErrors.push('min copies or max copies is empty');
       return false;
@@ -93,5 +99,9 @@ export class AppComponent implements AfterViewInit{
       return false;
     }
     return true;
+  }
+
+  toggleAdvancedSearch(): void{
+    this.advancedSearchAvailable = !this.advancedSearchAvailable;
   }
 }

@@ -1,5 +1,4 @@
 <header>
-  <h1 class="text-xl font-bold underline text-center mt-10">Angular v19.1 + Tailwind CSS 4.0</h1>
 </header>
 <main>
   <div class="max-w-4xl m-auto">
@@ -13,13 +12,19 @@
         />
         <button [disabled]="isInvalidForm" class="text-neutral-50 bg-blue-500 px-2 grow-1 disabled:bg-blue-300 disabled:cursor-not-allowed">search</button>
       </form>
+      <button 
+        (click)="toggleAdvancedSearch()" 
+        class="bg-blue-500">
+        advanced search
+      </button>
   </div>
-  <div
+ 
+  <div *ngIf="advancedSearchAvailable"
     class="bg-white max-w-6xl border-1 border-neutral-200 m-auto"
     >
     <form 
     #myForm="ngForm" 
-    class="flex min-h-24 p-3 gap-x-12 gap-y-4 flex-wrap">
+    class="flex p-3 gap-x-12 gap-y-4 flex-wrap">
       <div>
         <label for="startDate">Start Date:</label>
         <br>
@@ -114,7 +119,7 @@
     </form>
     <div class="px-3">
       <div *ngFor="let error of formErrors">
-        
+        <div class="text-sm">{{error}}</div>
       </div>
     </div>
   </div>
