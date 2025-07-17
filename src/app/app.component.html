@@ -1,7 +1,8 @@
 <header>
 </header>
 <main>
-  <div class="max-w-4xl m-auto">
+  <div>
+    <div class="max-w-4xl m-auto">
       <form class="flex">
         <input 
           class="bg-neutral-50 px-2 grow-4 shadow-2xs border-2 border-blue-500"
@@ -10,7 +11,7 @@
           name="searchTerm"
           [(ngModel)]="searchTerm"
         />
-        <button [disabled]="isInvalidForm" class="text-neutral-50 bg-blue-500 px-2 grow-1 disabled:bg-blue-300 disabled:cursor-not-allowed">search</button>
+        <button (click)="submitForm()" [disabled]="isInvalidForm" class="text-neutral-50 bg-blue-500 px-2 grow-1 disabled:bg-blue-300 disabled:cursor-not-allowed">search</button>
       </form>
       <button 
         (click)="toggleAdvancedSearch()" 
@@ -113,12 +114,26 @@
       </div>
     </div>
   </div>
-
+  </div>
   
-  <article class="book-card bg-neutral-50">
-    <h4 class="text-xl font-bold">Card title</h4>
-    <div>
-      <p>Card content</p>
-    </div>
-  </article>
+
+  <div style="overflow-y: scroll; max-height: 80vh; height: 80vh;" class="max-w-4xl m-auto mt-1">
+    <ng-container *ngFor="let bookModel of bookModels; let i = index; let first = first; let last = last">
+      <article *ngIf="!last" class="book-card bg-neutral-50">
+        <h4  class="text-xl font-bold">{{bookModel.title}}</h4>
+        <div>
+          <p>{{bookModel.description}}</p>
+        </div>
+      </article>
+      <article *ngIf="last" #lastBookObserver class="book-card bg-neutral-50">
+        <h4  class="text-xl font-bold">{{bookModel.title}}</h4>
+        <div>
+          <p>{{bookModel.description}}</p>
+          <p></p>
+        </div>
+      </article>
+    </ng-container>
+    
+  </div>
+  
 </main>

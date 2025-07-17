@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit} from '@angular/core';
+import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
+import { AfterViewChecked, Component, ElementRef, inject, OnInit, ViewChild} from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import {JsonPipe} from '@angular/common';
+import { BookModel } from './model/BookModel';
 
 interface SortOrder {
   value: string;
@@ -16,12 +17,12 @@ interface SortColumn {
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [CommonModule, FormsModule, JsonPipe, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
 
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit, AfterViewChecked{
   readonly MIN_DATE_CONST : string = '0001-01-01T00:00:00';
   readonly MAX_DATE_CONST : string = '9999-12-31T23:59:59'
   title = 'BookSearch-FE';
@@ -47,6 +48,12 @@ export class AppComponent implements OnInit{
   ];
 
   private fb: FormBuilder = inject(FormBuilder);
+  private httpClient: HttpClient = inject(HttpClient);
+  private page: number = 0;
+  bookModels: BookModel[] = [];
+  @ViewChild('lastBookObserver') targetObserver?: ElementRef;
+  options = { rootMargin: '0px', threshold: 0.5, root: null }
+  observer: IntersectionObserver = new IntersectionObserver(this.handleObserver.bind(this), this.options);
   ngOnInit(): void {
     this.advancedSearchForm = this.fb.group({
       startDate: [''],
@@ -62,7 +69,35 @@ export class AppComponent implements OnInit{
     this.advancedSearchForm.valueChanges.subscribe((value) => {
       this.validateAdvancedSearchForm();
     });
+
+    this.submitForm();
   }
+
+  ngAfterViewChecked(): void {
+    if (this.targetObserver) {
+      this.observer.observe(this.targetObserver?.nativeElement);
+    }
+  }
+
+  handleObserver(entries: any[]) {
+    entries.forEach(entry => {
+      const {
+      boundingClientRect,
+      intersectionRatio,
+      intersectionRect,
+      isIntersecting,
+      rootBounds,
+      target,
+      time
+      } = entry;
+      console.log(entry)
+      if (isIntersecting) {
+        this.scrollForm();
+        console.log('called');
+      }
+    })
+
+  };
 
   private checkCopiesInput(minCopies: number, maxCopies: number): boolean{
     if (minCopies === null || maxCopies === null){
@@ -105,18 +140,23 @@ export class AppComponent implements OnInit{
     return true;
   }
 
+  private convertInputStrDateToDate(date: string, isMinDate: boolean){
+    if (date === ''){
+      if (isMinDate){
+        return new Date(this.MIN_DATE_CONST);
+      }
+      return new Date(this.MAX_DATE_CONST);
+    }
+    if (isMinDate){
+      return new Date(`${date}T00:00:00`);
+    }
+    return new Date(`${date}T23:59:59`);
+    
+  }
+
   private checkDateRangeInput(minDate: string, maxDate: string): boolean{
-    let convertedMinDate = new Date(this.MIN_DATE_CONST);
-    let convertedMaxDate = new Date(this.MAX_DATE_CONST);
-    if (minDate !== ''){
-      convertedMinDate = new Date(`${minDate}T00:00:00`);
-    }
-
-    if (maxDate !== ''){
-      convertedMaxDate = new Date(`${maxDate}T23:59:59`);
-    }
-    console.log(convertedMinDate, convertedMaxDate);
-
+    let convertedMinDate = this.convertInputStrDateToDate(minDate, true);
+    let convertedMaxDate = this.convertInputStrDateToDate(maxDate, false);
     if (convertedMinDate > convertedMaxDate){
       this.formErrors.push('min date has to be smaller than max date');
       return false;
@@ -139,5 +179,65 @@ export class AppComponent implements OnInit{
 
   toggleAdvancedSearch(): void{
     this.advancedSearchAvailable = !this.advancedSearchAvailable;
+  }
+
+  private getLocalDateForFormSubmit(date: Date, isMinDate: boolean): string{
+    let day = String(date.getDate());      // Day of the month (1–31)
+    let month = String(date.getMonth() + 1);   // Month (0–11) → add 1 to get 1–12
+    let year = String(date.getFullYear());
+    if (day.length === 1){
+      day = '0' + day;
+    }
+
+    if (month.length === 1){
+      month = '0' + month;
+    }
+
+    let additionalPrefixZeros = '';
+    for (let i = 0; i<(4 - year.length); i++){
+      additionalPrefixZeros += '0';
+    }
+    year = additionalPrefixZeros + year;
+    if (isMinDate){
+      return `${year}-${month}-${day}T00:00:00`;
+    }
+    return `${year}-${month}-${day}T23:59:59`;
+  }
+
+  private getParams(): HttpParams{
+    const {startDate, endDate, sortOrder, sortColumn, minCopies, maxCopies, minRating, maxRating} = this.advancedSearchForm.value;
+    const params = new HttpParams()
+    .set('page',this.page)
+    .set('sortColumn', sortColumn)
+    .set('sortOrder', sortOrder)
+    .set('searchTerm', this.searchTerm)
+    .set('minCreatedAt',this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(startDate, true), true))
+    .set('maxCreatedAt', this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(endDate, false), false))
+    .set('minCopies', minCopies)
+    .set('maxCopies', maxCopies)
+    .set('minRatings', minRating)
+    .set('maxRatings', maxRating);
+    return params;
+  } 
+
+  submitForm(): void {
+    if (this.isInvalidForm){
+      return;
+    }
+    this.page = 0;
+    this.bookModels = [];
+    this.scrollForm();
+    
+  }
+
+  scrollForm(): void{
+    const params = this.getParams();
+    this.httpClient.get<BookModel[]>('http://localhost:8282/api/book/all-books', {params})
+    .subscribe((data: BookModel[])=>{
+      this.bookModels = this.bookModels.concat(data);
+      this.advancedSearchAvailable = false;
+      console.log(this.bookModels);
+      this.page++;
+    });
   }
 }
