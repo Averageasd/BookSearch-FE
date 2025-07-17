@@ -2,7 +2,7 @@
 </header>
 <main>
   <div class="max-w-4xl m-auto">
-      <form class="px-5 py-5 flex">
+      <form class="flex">
         <input 
           class="bg-neutral-50 px-2 grow-4 shadow-2xs border-2 border-blue-500"
           placeholder="search term for title, author and description..."
@@ -14,72 +14,69 @@
       </form>
       <button 
         (click)="toggleAdvancedSearch()" 
-        class="bg-blue-500">
+        class="text-neutral-50 bg-blue-500 mt-1">
         advanced search
       </button>
   </div>
  
-  <div *ngIf="advancedSearchAvailable"
+  <div [hidden]="!advancedSearchAvailable"
     class="bg-white max-w-6xl border-1 border-neutral-200 m-auto"
     >
     <form 
-    #myForm="ngForm" 
+    [formGroup]="advancedSearchForm"
     class="flex p-3 gap-x-12 gap-y-4 flex-wrap">
       <div>
         <label for="startDate">Start Date:</label>
         <br>
-        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="startDate" name="startDate">
+        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="startDate" formControlName="startDate">
       </div>
       
       <div>
         <label for="startDate">End Date:</label>
         <br>
-        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" value="9999-12-31" name="endDate">
+        <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" formControlName="endDate">
       </div>
       
       <div>
-        <label>Pick a column to sort:</label>
+        <label for="sortColumn">Pick a column to sort:</label>
         <br>
-        <select class="border-1 bg-neutral-50 border-neutral-200">
-          <option *ngFor="let sortColumn of sortColumns" [ngValue]="sortColumn.value">{{sortColumn.viewValue}}</option>
+        <select id="sortColumn" class="border-1 bg-neutral-50 border-neutral-200" formControlName="sortColumn">
+          <option *ngFor="let sortColumn of sortColumns" [value]="sortColumn.value">{{sortColumn.viewValue}}</option>
         </select>
       </div>
       
       <div>
         <label>Pick a sorting order:</label>
         <br>
-        <select class="border-1 bg-neutral-50 border-neutral-200">
+        <select id="sortOrder" class="border-1 bg-neutral-50 border-neutral-200" formControlName="sortOrder">
           <option *ngFor="let sortOrder of sortOrders" [ngValue]="sortOrder.value">{{sortOrder.viewValue}}</option>
         </select>
       </div>
       
       <div>
-        <label>Enter number of min copies:</label>
+        <label for="minCopies">Enter number of min copies:</label>
         <br>
         <input 
+          id="minCopies"
+          formControlName="minCopies"
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
           min="1"
-          value="1"
           max="100"
-          name="mincopies"
-          [(ngModel)]="minCopies"
-          #mincopies="ngModel"
+          formControlName="minCopies"
         />
       </div>
       
       <div>
-        <label>Enter number of max copies:</label>
+        <label for="maxCopies">Enter number of max copies:</label>
         <br>
         <input 
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
           min="1"
-          value="1"
           max="100"
-          name="maxcopies"
-          [(ngModel)]="maxCopies"
-          #maxcopies="ngModel"
+          id="maxCopies"
+          formControlName="maxCopies"
 
         />
       </div>
@@ -92,12 +89,8 @@
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
           min="0"
-          value="0"
           max="5"
-          [(ngModel)]="minRating"
-          name="minrating"
-          #minrating="ngModel"
-         
+          formControlName="minRating"
         />
       </div>
       
@@ -108,18 +101,15 @@
           id="maxrating"
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
-          value="0"
           min="0"
           max="5"
-          [(ngModel)]="maxRating"
-          name="maxrating"
-          #maxrating="ngModel"
+          formControlName="maxRating"
         />
       </div>
     </form>
     <div class="px-3">
       <div *ngFor="let error of formErrors">
-        <div class="text-sm">{{error}}</div>
+        <div class="text-sm text-red-500">{{error}}</div>
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { Component, inject, OnInit} from '@angular/core';
+import { FormGroup, FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import {JsonPipe} from '@angular/common';
 
 interface SortOrder {
@@ -16,28 +16,22 @@ interface SortColumn {
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [CommonModule, FormsModule, JsonPipe],
+  imports: [CommonModule, FormsModule, JsonPipe, ReactiveFormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
 
 export class AppComponent implements OnInit{
-
+  readonly MIN_DATE_CONST : string = '0001-01-01T00:00:00';
+  readonly MAX_DATE_CONST : string = '9999-12-31T23:59:59'
   title = 'BookSearch-FE';
   isInvalidForm :boolean | null = false;
   searchTerm:string = '';
-  sortOrder:string = 'DESC';
-  sortColumn:string = 'created_at';
-  minCopies:number = 1;
-  maxCopies:number = 1;
-  minRating: number = 0;
-  maxRating: number = 0;
-  minDate: string = '0001-01-01T00:00:00Z';
-  maxDate: string = '9999-12-31T23:59:59Z';
-  advancedSearchAvailable:boolean = false;
 
-  // we want to make sure angular does not query this element before ngOnInit thus preventing it from being null unexpectedly.
-  @ViewChild('myForm', { static: false }) form!: NgForm;
+  minDate: string = this.MIN_DATE_CONST;
+  maxDate: string = this.MAX_DATE_CONST;
+  advancedSearchAvailable:boolean = false;
+  advancedSearchForm!: FormGroup;
   formErrors: string[] = [];
 
   sortOrders: SortOrder[] = [
@@ -51,54 +45,96 @@ export class AppComponent implements OnInit{
     {value: 'rating', viewValue: 'Book rating'},
     {value: 'title', viewValue: 'Book title'}
   ];
+
+  private fb: FormBuilder = inject(FormBuilder);
   ngOnInit(): void {
-    if (this.form && this.form.statusChanges){
-      this.form.statusChanges?.subscribe(()=>{
-        console.log('get called?');
-        this.formErrors = [];
-        if (!this.checkCopiesInput() || !this.checkRatingInput()){
-          this.isInvalidForm = true;
-        }
-        else{
-          this.isInvalidForm = false;
-        }
-      });
-    }
+    this.advancedSearchForm = this.fb.group({
+      startDate: [''],
+      endDate: [''],
+      sortOrder: ['ASC'],
+      sortColumn: ['created_at'],
+      minCopies:[1],
+      maxCopies:[1],
+      minRating:[0],
+      maxRating:[0]
+    });
+
+    this.advancedSearchForm.valueChanges.subscribe((value) => {
+      this.validateAdvancedSearchForm();
+    });
   }
 
-  private checkCopiesInput(): boolean{
-    const minCopies:string = String(this.form.controls['mincopies']?.value ?? '');
-    const maxCopies:string = String(this.form.controls['maxcopies']?.value ?? '');
-    console.log(typeof(minCopies));
-    console.log(minCopies, maxCopies);
-    if (!minCopies || !maxCopies){
-      this.formErrors.push('min copies or max copies is empty');
+  private checkCopiesInput(minCopies: number, maxCopies: number): boolean{
+    if (minCopies === null || maxCopies === null){
+      this.formErrors.push('min copies is null or max copies is null');
       return false;
     }
-    if (minCopies.includes('.') || maxCopies.includes('.')){
-      this.formErrors.push('min copies and max copies have to be whole numbers')
+
+    if (minCopies <= 0 || maxCopies <= 0){
+      this.formErrors.push('min copies is 0 or max copies is 0');
       return false;
     }
-    let minCopiesNum: number = Number(minCopies);
-    let maxCopiesNum: number = Number(maxCopies);
-    if (maxCopiesNum < minCopiesNum){
+
+    if (String(minCopies).includes('.') || String(maxCopies).includes('.')){
+      this.formErrors.push('min copies and max copies have to be integers');
+      return false;
+    }
+
+    if (minCopies > maxCopies){
+      this.formErrors.push('max copies cannot be smaller than min copies');
       return false;
     }
     return true;
   }
 
-  private checkRatingInput(): boolean{
-    const minRating:string = String(this.form.controls['minrating']?.value);
-    const maxRating:string = String(this.form.controls['maxrating']?.value);
+  private checkRatingInput(minRating: number, maxRating: number): boolean{
     if (minRating === null || maxRating === null){
+      this.formErrors.push('min rating or max rating is empty');
       return false;
     }
-    let minRatingNum: number = Number(minRating);
-    let maxRatingNum: number = Number(maxRating);
-    if (maxRatingNum < minRatingNum){
+
+    if (minRating < 0 || maxRating < 0){
+      this.formErrors.push('min rating is smaller than 0 or max rating is smaller than 0');
+      return false;
+    }
+
+    if (minRating > maxRating){
+      this.formErrors.push('max rating cannot be smaller than min rating');
       return false;
     }
     return true;
+  }
+
+  private checkDateRangeInput(minDate: string, maxDate: string): boolean{
+    let convertedMinDate = new Date(this.MIN_DATE_CONST);
+    let convertedMaxDate = new Date(this.MAX_DATE_CONST);
+    if (minDate !== ''){
+      convertedMinDate = new Date(`${minDate}T00:00:00`);
+    }
+
+    if (maxDate !== ''){
+      convertedMaxDate = new Date(`${maxDate}T23:59:59`);
+    }
+    console.log(convertedMinDate, convertedMaxDate);
+
+    if (convertedMinDate > convertedMaxDate){
+      this.formErrors.push('min date has to be smaller than max date');
+      return false;
+    }
+    return true;
+  }
+
+  private validateAdvancedSearchForm(): void{
+    const {startDate, endDate, sortOrder, sortColumn, minCopies, maxCopies, minRating, maxRating} = this.advancedSearchForm.value;
+    this.formErrors = [];
+    const copyInputValidationRes = this.checkCopiesInput(minCopies, maxCopies);
+    const ratingInputValidationRes = this.checkRatingInput(minRating, maxRating);
+    const dateRangeInputValidationRes = this.checkDateRangeInput(startDate, endDate);
+    if (!copyInputValidationRes || !ratingInputValidationRes || !dateRangeInputValidationRes){
+      this.isInvalidForm = true;
+      return;
+    }
+    this.isInvalidForm = false;
   }
 
   toggleAdvancedSearch(): void{
