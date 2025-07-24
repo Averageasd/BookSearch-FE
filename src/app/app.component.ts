@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpClientModule, HttpParams} from '@angular/common/http';
 import {AfterViewChecked, Component, ElementRef, inject, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BookModel} from './model/BookModel';
@@ -17,7 +17,7 @@ interface SortColumn {
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
@@ -229,7 +229,7 @@ export class AppComponent implements OnInit, AfterViewChecked{
 
   scrollForm(): void{
     const params = this.getParams();
-    this.httpClient.get<BookModel[]>('http://localhost:8282/api/book/all-books', {params})
+    this.httpClient.get<BookModel[]>('http://localhost:8080/api/book/all-books', {params})
     .subscribe((data: BookModel[])=>{
       this.bookModels = this.bookModels.concat(data);
       this.advancedSearchAvailable = false;
