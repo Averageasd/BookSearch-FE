@@ -1,23 +1,23 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
-import { AfterViewChecked, Component, ElementRef, inject, OnInit, ViewChild} from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { BookModel } from './model/BookModel';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {AfterViewChecked, Component, ElementRef, inject, OnInit, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BookModel} from './model/BookModel';
 
 interface SortOrder {
   value: string;
   viewValue: string;
-};
+}
 
 interface SortColumn {
   value: string;
   viewValue: string;
-};
+}
 
 @Component({
   selector: 'app-root',
   providers:[],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss' ,'../styles.scss']
 })
@@ -29,8 +29,6 @@ export class AppComponent implements OnInit, AfterViewChecked{
   isInvalidForm :boolean | null = false;
   searchTerm:string = '';
 
-  minDate: string = this.MIN_DATE_CONST;
-  maxDate: string = this.MAX_DATE_CONST;
   advancedSearchAvailable:boolean = false;
   advancedSearchForm!: FormGroup;
   formErrors: string[] = [];
@@ -66,7 +64,7 @@ export class AppComponent implements OnInit, AfterViewChecked{
       maxRating:[0]
     });
 
-    this.advancedSearchForm.valueChanges.subscribe((value) => {
+    this.advancedSearchForm.valueChanges.subscribe(() => {
       this.validateAdvancedSearchForm();
     });
 
@@ -151,7 +149,7 @@ export class AppComponent implements OnInit, AfterViewChecked{
       return new Date(`${date}T00:00:00`);
     }
     return new Date(`${date}T23:59:59`);
-    
+
   }
 
   private checkDateRangeInput(minDate: string, maxDate: string): boolean{
@@ -206,19 +204,18 @@ export class AppComponent implements OnInit, AfterViewChecked{
 
   private getParams(): HttpParams{
     const {startDate, endDate, sortOrder, sortColumn, minCopies, maxCopies, minRating, maxRating} = this.advancedSearchForm.value;
-    const params = new HttpParams()
-    .set('page',this.page)
-    .set('sortColumn', sortColumn)
-    .set('sortOrder', sortOrder)
-    .set('searchTerm', this.searchTerm)
-    .set('minCreatedAt',this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(startDate, true), true))
-    .set('maxCreatedAt', this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(endDate, false), false))
-    .set('minCopies', minCopies)
-    .set('maxCopies', maxCopies)
-    .set('minRatings', minRating)
-    .set('maxRatings', maxRating);
-    return params;
-  } 
+    return new HttpParams()
+      .set('page', this.page)
+      .set('sortColumn', sortColumn)
+      .set('sortOrder', sortOrder)
+      .set('searchTerm', this.searchTerm)
+      .set('minCreatedAt', this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(startDate, true), true))
+      .set('maxCreatedAt', this.getLocalDateForFormSubmit(this.convertInputStrDateToDate(endDate, false), false))
+      .set('minCopies', minCopies)
+      .set('maxCopies', maxCopies)
+      .set('minRatings', minRating)
+      .set('maxRatings', maxRating);
+  }
 
   submitForm(): void {
     if (this.isInvalidForm){
@@ -227,7 +224,7 @@ export class AppComponent implements OnInit, AfterViewChecked{
     this.page = 0;
     this.bookModels = [];
     this.scrollForm();
-    
+
   }
 
   scrollForm(): void{
