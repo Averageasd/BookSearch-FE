@@ -176,6 +176,7 @@ export class AppComponent implements OnInit, AfterViewChecked{
   }
 
   toggleAdvancedSearch(): void{
+    console.log("advanced search toggle?");
     this.advancedSearchAvailable = !this.advancedSearchAvailable;
   }
 

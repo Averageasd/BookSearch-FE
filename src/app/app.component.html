@@ -4,7 +4,7 @@
   <div>
     <div class="max-w-4xl m-auto">
       <form class="flex">
-        <input 
+        <input
           class="bg-neutral-50 px-2 grow-4 shadow-2xs border-2 border-blue-500"
           placeholder="search term for title, author and description..."
           type="text"
@@ -13,17 +13,17 @@
         />
         <button (click)="submitForm()" [disabled]="isInvalidForm" class="text-neutral-50 bg-blue-500 px-2 grow-1 disabled:bg-blue-300 disabled:cursor-not-allowed">search</button>
       </form>
-      <button 
-        (click)="toggleAdvancedSearch()" 
+      <button
+        (click)="toggleAdvancedSearch()"
         class="text-neutral-50 bg-blue-500 mt-1">
         advanced search
       </button>
   </div>
- 
+
   <div [hidden]="!advancedSearchAvailable"
     class="bg-white max-w-6xl border-1 border-neutral-200 m-auto"
     >
-    <form 
+    <form
     [formGroup]="advancedSearchForm"
     class="flex p-3 gap-x-12 gap-y-4 flex-wrap">
       <div>
@@ -31,13 +31,13 @@
         <br>
         <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="startDate" formControlName="startDate">
       </div>
-      
+
       <div>
         <label for="startDate">End Date:</label>
         <br>
         <input class="border-1 border-neutral-200 bg-neutral-50" type="date" id="end date" formControlName="endDate">
       </div>
-      
+
       <div>
         <label for="sortColumn">Pick a column to sort:</label>
         <br>
@@ -45,7 +45,7 @@
           <option *ngFor="let sortColumn of sortColumns" [value]="sortColumn.value">{{sortColumn.viewValue}}</option>
         </select>
       </div>
-      
+
       <div>
         <label>Pick a sorting order:</label>
         <br>
@@ -53,11 +53,11 @@
           <option *ngFor="let sortOrder of sortOrders" [ngValue]="sortOrder.value">{{sortOrder.viewValue}}</option>
         </select>
       </div>
-      
+
       <div>
         <label for="minCopies">Enter number of min copies:</label>
         <br>
-        <input 
+        <input
           id="minCopies"
           formControlName="minCopies"
           class="border-1 bg-neutral-50 border-neutral-200"
@@ -67,11 +67,11 @@
           formControlName="minCopies"
         />
       </div>
-      
+
       <div>
         <label for="maxCopies">Enter number of max copies:</label>
         <br>
-        <input 
+        <input
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
           min="1"
@@ -85,7 +85,7 @@
       <div>
         <label for="minrating">Enter number of min rating:</label>
         <br>
-        <input 
+        <input
           id="minrating"
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
@@ -94,11 +94,11 @@
           formControlName="minRating"
         />
       </div>
-      
+
       <div>
         <label for="maxrating">Enter number of max rating:</label>
         <br>
-        <input 
+        <input
           id="maxrating"
           class="border-1 bg-neutral-50 border-neutral-200"
           type="number"
@@ -115,25 +115,25 @@
     </div>
   </div>
   </div>
-  
 
-  <div style="overflow-y: scroll; max-height: 80vh; height: 80vh;" class="max-w-4xl m-auto mt-1">
-    <ng-container *ngFor="let bookModel of bookModels; let i = index; let first = first; let last = last">
-      <article *ngIf="!last" class="book-card bg-neutral-50">
+
+  <div style="overflow-y: scroll; max-height: 80vh; height: 80vh;" class="grid max-w-4xl m-auto mt-1 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+    <div class="book-card bg-white" *ngFor="let bookModel of bookModels; let i = index; let first = first; let last = last">
+      <article *ngIf="!last" >
         <h4  class="text-xl font-bold">{{bookModel.title}}</h4>
         <div>
           <p>{{bookModel.description}}</p>
         </div>
       </article>
-      <article *ngIf="last" #lastBookObserver class="book-card bg-neutral-50">
+      <article *ngIf="last" #lastBookObserver>
         <h4  class="text-xl font-bold">{{bookModel.title}}</h4>
         <div>
           <p>{{bookModel.description}}</p>
           <p></p>
         </div>
       </article>
-    </ng-container>
-    
+    </div>
+
   </div>
-  
+
 </main>
