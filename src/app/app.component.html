@@ -117,8 +117,8 @@
   </div>
 
 
-  <div style="overflow-y: scroll; max-height: 80vh; height: 80vh;" class="grid max-w-4xl m-auto mt-1 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-    <div class="book-card bg-white" *ngFor="let bookModel of bookModels; let i = index; let first = first; let last = last">
+  <div style="overflow-y: scroll; max-height: 80vh; height: 80vh;" class="grid max-w-4xl m-auto mt-1 grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 auto-rows-max">
+    <div class=" book-card" *ngFor="let bookModel of bookModels; let i = index; let first = first; let last = last">
       <article *ngIf="!last" >
         <h4  class="text-xl font-bold">{{bookModel.title}}</h4>
         <div>
